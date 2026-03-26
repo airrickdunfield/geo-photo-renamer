@@ -20,7 +20,7 @@ Renamed files land in `~/Pictures/geo-renamed/`. Counters persist across runs so
 **One-command install (Mac & Linux):**
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/YOUR_USERNAME/geo-photo-renamer/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/airrickdunfield/geo-photo-renamer/main/install.sh | bash
 ```
 
 **Or directly with pip:**
