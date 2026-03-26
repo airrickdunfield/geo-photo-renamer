@@ -204,17 +204,32 @@ def gps_from_exiftool(filepath: Path):
         return None
     try:
         result = subprocess.run(
-            [EXIFTOOL, "-GPSLatitude#", "-GPSLongitude#", "-n", "-csv", str(filepath)],
+            [EXIFTOOL, "-j", "-n",
+             "-GPSLatitude", "-GPSLongitude", "-GPSCoordinates",
+             str(filepath)],
             capture_output=True, text=True, timeout=10,
         )
-        lines = [ln for ln in result.stdout.strip().splitlines() if ln and "SourceFile" not in ln]
-        if not lines:
+        if not result.stdout.strip():
             return None
-        parts = lines[0].split(",")
-        if len(parts) >= 3:
-            lat, lon = float(parts[1]), float(parts[2])
-            if lat != 0.0 or lon != 0.0:
-                return (lat, lon)
+        data = json.loads(result.stdout)
+        if not data:
+            return None
+        entry = data[0]
+
+        lat = entry.get("GPSLatitude")
+        lon = entry.get("GPSLongitude")
+        if lat is not None and lon is not None and (float(lat) != 0.0 or float(lon) != 0.0):
+            return (float(lat), float(lon))
+
+        # Fallback: iPhone videos store GPS as a combined GPSCoordinates string
+        # (ISO 6709, e.g. "+49.1234+012.5678+100.000/" or "49.1234, 12.5678")
+        coords_str = entry.get("GPSCoordinates", "")
+        if coords_str:
+            parts = re.split(r"[,\s]+", coords_str.strip().rstrip("/"))
+            if len(parts) >= 2:
+                lat2, lon2 = float(parts[0]), float(parts[1])
+                if lat2 != 0.0 or lon2 != 0.0:
+                    return (lat2, lon2)
     except Exception:
         pass
     return None
