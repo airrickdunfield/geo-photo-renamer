@@ -48,7 +48,8 @@ fi
 heading "Installing geo-photo-renamer..."
 info "Source: ${REPO}"
 
-"$PYTHON" -m pip install --quiet --upgrade "${PACKAGE}"
+"$PYTHON" -m pip install --quiet --upgrade --user "${PACKAGE}" 2>/dev/null \
+    || "$PYTHON" -m pip install --quiet --upgrade --user --break-system-packages "${PACKAGE}"
 
 # ── Verify ────────────────────────────────────────────────────────────────────
 heading "Verifying installation..."
