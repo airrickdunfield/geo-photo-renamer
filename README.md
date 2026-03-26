@@ -68,22 +68,42 @@ geo-rename --output ~/Desktop/out ~/Downloads/photos
 geo-rename --data-dir /mnt/nas/geo-data ~/Downloads/photos
 ```
 
+### Setting a default folder
+
+If you always process the same folder, save it once so you can run `geo-rename` with no arguments:
+
+```bash
+geo-rename --set-default ~/Downloads/photos
+# Saved. From now on, just run:
+geo-rename
+```
+
+The default is stored in `~/.geo-photo-renamer/config.json`. You can change it any time by running `--set-default` again, or edit the file directly:
+
+```json
+{
+  "default_folder": "/Users/you/Downloads/photos"
+}
+```
+
 **All options:**
 
 ```
-usage: geo-rename [-h] [--output DIR] [--data-dir DIR] [--dry-run] [--yes] [--version]
-                  FOLDER [FOLDER ...]
+usage: geo-rename [-h] [--output DIR] [--data-dir DIR] [--set-default DIR]
+                  [--dry-run] [--yes] [--version] [FOLDER ...]
 
 positional arguments:
-  FOLDER          Folder(s) containing photos/videos to rename
+  FOLDER              Folder(s) containing photos/videos to rename
+                      (uses saved default if omitted)
 
 options:
-  --output DIR    Where to place renamed files (default: ~/Pictures/geo-renamed)
-  --data-dir DIR  Where to store rename_counts.json and rename_log.txt
-                  (default: ~/.geo-photo-renamer)
-  --dry-run       Show what would be renamed without moving any files
-  --yes, -y       Skip the confirmation prompt
-  --version       Show version
+  --set-default DIR   Save DIR as the default source folder and exit
+  --output DIR        Where to place renamed files (default: ~/Pictures/geo-renamed)
+  --data-dir DIR      Where to store rename_counts.json and rename_log.txt
+                      (default: ~/.geo-photo-renamer)
+  --dry-run           Show what would be renamed without moving any files
+  --yes, -y           Skip the confirmation prompt
+  --version           Show version
 ```
 
 ---

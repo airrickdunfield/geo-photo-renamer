@@ -257,6 +257,26 @@ def batch_geocode(coords: list) -> dict:
     return mapping
 
 
+# ── Config persistence ─────────────────────────────────────────────────────────
+
+_DEFAULT_DATA_DIR = Path.home() / ".geo-photo-renamer"
+_CONFIG_FILE = _DEFAULT_DATA_DIR / "config.json"
+
+
+def load_config() -> dict:
+    if _CONFIG_FILE.exists():
+        try:
+            return json.loads(_CONFIG_FILE.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+    return {}
+
+
+def save_config(config: dict) -> None:
+    _DEFAULT_DATA_DIR.mkdir(parents=True, exist_ok=True)
+    _CONFIG_FILE.write_text(json.dumps(config, indent=2, sort_keys=True), encoding="utf-8")
+
+
 # ── Counts persistence ─────────────────────────────────────────────────────────
 
 def load_counts(counts_file: Path) -> dict:
@@ -285,9 +305,14 @@ def main() -> None:
     )
     parser.add_argument(
         "folders",
-        nargs="+",
+        nargs="*",
         metavar="FOLDER",
-        help="Folder(s) containing photos/videos to rename",
+        help="Folder(s) containing photos/videos to rename (uses saved default if omitted)",
+    )
+    parser.add_argument(
+        "--set-default",
+        metavar="DIR",
+        help="Save DIR as the default source folder and exit",
     )
     parser.add_argument(
         "--output", "-o",
@@ -318,6 +343,33 @@ def main() -> None:
         version=f"geo-rename {__version__}",
     )
     args = parser.parse_args()
+
+    config = load_config()
+
+    # ── Handle --set-default ───────────────────────────────────────────────────
+    if args.set_default:
+        folder = Path(args.set_default).expanduser().resolve()
+        if not folder.is_dir():
+            sys.exit(f"ERROR: folder not found — {folder}")
+        config["default_folder"] = str(folder)
+        save_config(config)
+        print(f"Default folder set to: {folder}")
+        print("Run  geo-rename  with no arguments to use it.")
+        sys.exit(0)
+
+    # ── Resolve folders — fall back to saved default ───────────────────────────
+    if not args.folders:
+        default = config.get("default_folder")
+        if default:
+            print(f"  Using saved default folder: {default}")
+            args.folders = [default]
+        else:
+            print("No folder specified and no default folder is set.\n")
+            print("  Usage:  geo-rename FOLDER [FOLDER ...]")
+            print("  Or set a default folder once with:")
+            print("    geo-rename --set-default ~/path/to/photos\n")
+            print("  Then just run:  geo-rename")
+            sys.exit(1)
 
     # ── Resolve paths ──────────────────────────────────────────────────────────
     source_dirs: list[Path] = [Path(f).expanduser().resolve() for f in args.folders]
