@@ -28,7 +28,7 @@ if ! command -v pipx &>/dev/null; then
         error "Homebrew is required to install pipx.\n  Install from https://brew.sh, then re-run this script."
     fi
     brew install pipx
-    pipx ensurepath
+    pipx ensurepath || true
     # Make pipx available in this shell session
     export PATH="$PATH:$HOME/.local/bin"
 fi

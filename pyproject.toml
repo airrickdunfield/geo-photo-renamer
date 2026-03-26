@@ -19,6 +19,7 @@ heic = ["pillow-heif"]
 
 [project.scripts]
 geo-rename = "geo_renamer.cli:main"
+geo-update = "geo_renamer.cli:update"
 
 [tool.setuptools.packages.find]
 where = ["src"]

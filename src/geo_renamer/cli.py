@@ -166,14 +166,26 @@ def gps_from_exif(filepath: Path):
         from PIL.ExifTags import GPSTAGS, TAGS
 
         img = Image.open(filepath)
-        exif_raw = img._getexif()
-        if not exif_raw:
-            return None
+
+        # Try the public getexif() API first — required for HEIC via pillow-heif
         gps_info = {}
-        for tag, val in exif_raw.items():
-            if TAGS.get(tag) == "GPSInfo":
-                gps_info = {GPSTAGS.get(t, t): v for t, v in val.items()}
-                break
+        try:
+            exif_obj = img.getexif()
+            gps_ifd = exif_obj.get_ifd(0x8825)  # 0x8825 = GPSInfo tag
+            if gps_ifd:
+                gps_info = {GPSTAGS.get(t, t): v for t, v in gps_ifd.items()}
+        except Exception:
+            pass
+
+        # Fall back to _getexif() for JPEG compatibility
+        if not gps_info:
+            exif_raw = img._getexif()
+            if exif_raw:
+                for tag, val in exif_raw.items():
+                    if TAGS.get(tag) == "GPSInfo":
+                        gps_info = {GPSTAGS.get(t, t): v for t, v in val.items()}
+                        break
+
         if not gps_info:
             return None
         lat = gps_info.get("GPSLatitude")
@@ -510,6 +522,26 @@ def main() -> None:
         if len(no_gps_files) > 8:
             print(f"    ... and {len(no_gps_files) - 8} more (see rename_log.txt)")
         print()
+
+
+def update() -> None:
+    from geo_renamer import __version__
+
+    repo = "https://github.com/airrickdunfield/geo-photo-renamer.git"
+    package = f"git+{repo}"
+
+    print(f"geo-update: current version {__version__}")
+    print(f"Fetching latest from {repo} ...")
+
+    pipx = shutil.which("pipx")
+    if not pipx:
+        sys.exit("pipx not found — cannot update. Install pipx and re-run the install script.")
+
+    result = subprocess.run(
+        [pipx, "install", "--force", package],
+        text=True,
+    )
+    sys.exit(result.returncode)
 
 
 if __name__ == "__main__":
