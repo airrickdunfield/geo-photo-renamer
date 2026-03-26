@@ -59,19 +59,19 @@ else
     info "Installed: ${VER}"
 fi
 
-# ── Optional: exiftool ────────────────────────────────────────────────────────
-heading "Optional dependencies..."
+# ── exiftool (required for video GPS) ─────────────────────────────────────────
+heading "Installing exiftool..."
 
 if command -v exiftool &>/dev/null; then
-    info "exiftool: $(exiftool -ver)  (video GPS enabled)"
+    info "exiftool: $(exiftool -ver)  (already installed)"
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+    info "Installing exiftool via Homebrew..."
+    brew install exiftool
+    info "exiftool: $(exiftool -ver)"
 else
-    warn "exiftool not found — video files without JSON sidecars will be skipped."
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        warn "Install with: brew install exiftool"
-    else
-        warn "Install with: sudo apt install libimage-exiftool-perl   # Debian/Ubuntu"
-        warn "           or: sudo dnf install perl-Image-ExifTool      # Fedora/RHEL"
-    fi
+    warn "exiftool not found — video GPS extraction will be unavailable."
+    warn "Install with: sudo apt install libimage-exiftool-perl   # Debian/Ubuntu"
+    warn "           or: sudo dnf install perl-Image-ExifTool      # Fedora/RHEL"
 fi
 
 # ── Done ──────────────────────────────────────────────────────────────────────

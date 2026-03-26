@@ -591,6 +591,26 @@ def main() -> None:
         print()
 
 
+def _ensure_exiftool() -> None:
+    """Install exiftool via Homebrew on macOS if not already present."""
+    if shutil.which("exiftool"):
+        print("exiftool: already installed")
+        return
+    import platform
+    if platform.system() == "Darwin":
+        brew = shutil.which("brew")
+        if not brew:
+            print("Warning: Homebrew not found — cannot auto-install exiftool.")
+            print("  Install manually: brew install exiftool")
+            return
+        print("Installing exiftool via Homebrew...")
+        subprocess.run([brew, "install", "exiftool"], check=False)
+    else:
+        print("Warning: exiftool not found — video GPS extraction will be unavailable.")
+        print("  Install with: sudo apt install libimage-exiftool-perl   # Debian/Ubuntu")
+        print("             or: sudo dnf install perl-Image-ExifTool      # Fedora/RHEL")
+
+
 def update() -> None:
     from geo_renamer import __version__
 
@@ -608,6 +628,10 @@ def update() -> None:
         [pipx, "install", "--force", package],
         text=True,
     )
+
+    if result.returncode == 0:
+        _ensure_exiftool()
+
     sys.exit(result.returncode)
 
 
