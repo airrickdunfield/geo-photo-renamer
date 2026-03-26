@@ -4,7 +4,7 @@
 
 set -euo pipefail
 
-REPO="https://github.com/YOUR_USERNAME/geo-photo-renamer"
+REPO="https://github.com/airrickdunfield/geo-photo-renamer"
 PACKAGE="git+${REPO}.git"
 
 # ── Colours ───────────────────────────────────────────────────────────────────

@@ -11,6 +11,8 @@ usa--wa--seattle--007.heic
 
 Renamed files land in `~/Pictures/geo-renamed/`. Counters persist across runs so filenames never collide when you process folders in batches.
 
+> **Note:** This tool was built and tested with [Google Photos Takeout](https://takeout.google.com) exports. It should work with any photos that have embedded GPS EXIF data, but folder structures, sidecar JSON formats, and metadata fields from other sources (iCloud exports, camera SD cards, etc.) may require adjustments.
+
 ---
 
 ## Install
@@ -24,7 +26,7 @@ curl -fsSL https://raw.githubusercontent.com/YOUR_USERNAME/geo-photo-renamer/mai
 **Or directly with pip:**
 
 ```bash
-pip install git+https://github.com/YOUR_USERNAME/geo-photo-renamer.git
+pip install git+https://github.com/airrickdunfield/geo-photo-renamer.git
 ```
 
 **Requirements:** Python 3.8+
@@ -34,6 +36,23 @@ pip install git+https://github.com/YOUR_USERNAME/geo-photo-renamer.git
 brew install exiftool                        # macOS
 sudo apt install libimage-exiftool-perl      # Debian/Ubuntu
 ```
+
+---
+
+## Uninstall
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/airrickdunfield/geo-photo-renamer/main/uninstall.sh | bash
+```
+
+Or manually:
+
+```bash
+pip uninstall geo-photo-renamer
+rm -rf ~/.geo-photo-renamer   # optional: removes counters and log
+```
+
+Output photos in `~/Pictures/geo-renamed/` are never touched by the uninstaller.
 
 ---
 
