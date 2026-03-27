@@ -101,6 +101,25 @@ AREA_ALIASES: dict[str, str] = {
     "north-vancouver": "vancouver",
 }
 
+# ── Coordinate overrides ────────────────────────────────────────────────────────
+# Checked before the geocoder. First match wins.
+# Each entry: (lat_min, lat_max, lon_min, lon_max, country, state, area)
+COORD_OVERRIDES: list[tuple] = [
+    # Southern Gulf Islands (BC) — listed smallest/most-specific first
+    (48.82, 48.87, -123.32, -123.22, "canada", "bc", "mayne-island"),
+    (48.74, 48.84, -123.33, -123.15, "canada", "bc", "pender-island"),
+    (48.74, 48.82, -123.22, -123.03, "canada", "bc", "saturna-island"),
+    (48.83, 48.97, -123.43, -123.27, "canada", "bc", "galiano-island"),
+    (48.72, 48.94, -123.60, -123.38, "canada", "bc", "salt-spring-island"),
+    # Northern Gulf Islands (BC)
+    (49.12, 49.20, -123.86, -123.69, "canada", "bc", "gabriola-island"),
+    (49.50, 49.57, -124.82, -124.70, "canada", "bc", "denman-island"),
+    (49.50, 49.56, -124.75, -124.63, "canada", "bc", "hornby-island"),
+    (49.47, 49.57, -124.38, -124.18, "canada", "bc", "lasqueti-island"),
+    (50.03, 50.20, -125.28, -125.07, "canada", "bc", "quadra-island"),
+    (50.00, 50.18, -125.08, -124.82, "canada", "bc", "cortes-island"),
+]
+
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -257,6 +276,15 @@ def batch_geocode(coords: list) -> dict:
     results = rg.search(unique, verbose=False)
     mapping = {}
     for coord, r in zip(unique, results):
+        lat, lon = coord
+        override = None
+        for lat_min, lat_max, lon_min, lon_max, c, s, a in COORD_OVERRIDES:
+            if lat_min <= lat <= lat_max and lon_min <= lon <= lon_max:
+                override = (c, s, a)
+                break
+        if override:
+            mapping[coord] = override
+            continue
         cc = r.get("cc", "")
         admin1 = r.get("admin1", "")
         city = r.get("name", "")
